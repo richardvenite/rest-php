@@ -1,0 +1,37 @@
+version: "3.0"
+
+services:
+  nginx:
+    image: nginx
+    container_name: nginx-rest
+    restart: unless-stopped
+    volumes:
+      - ./docker/nginx_conf:/etc/nginx/conf.d
+      - ./:/var/www/html/
+      -  /usr/bin/ssh:/usr/bin/ssh
+    depends_on:
+      - php
+    ports:
+     - 80:80
+    networks:
+      projetos_servicos:
+        ipv4_address: 10.11.0.14
+
+  php:
+    # build: ./
+    image: rest-php
+    container_name: php-rest
+    restart: unless-stopped
+    command: bash -c "php-fpm --allow-to-run-as-root"
+    volumes:
+      - ./:/var/www/html
+      - /usr/bin/ssh:/usr/bin/ssh
+    ports:
+      - 9000:9000
+    networks:
+      projetos_servicos:
+        ipv4_address: 10.11.0.15
+
+networks:
+  projetos_servicos:
+   external: true
