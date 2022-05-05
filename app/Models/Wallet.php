@@ -17,4 +17,12 @@ class Wallet extends Model
     protected $fillable = [
         'cash',
     ];
+
+    /**
+     * Get the user that owns the wallet.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'foreign_key', 'user_id');
+    }
 }

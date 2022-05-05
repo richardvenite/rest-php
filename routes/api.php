@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 /*
@@ -18,4 +17,4 @@ use App\Http\Controllers\Api\UserController;
 //     return $request->user();
 // });
 
-Route::get('/user', [UserController::class, 'Index']);
+Route::post('/user/transaction', [UserController::class, 'transaction']);
