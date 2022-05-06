@@ -35,17 +35,17 @@ class UserController extends Controller
         $value = $request->value;
 
         if ($validator->fails()){
-            return response()->json($validator->errors());       
+            return response()->json(['error' => $validator->errors()], 400);       
         }
 
         if (!$this->userService->hasCashWallet($payer, $value)) {
-            return response()->json(['error' => 'Payer doesn\'t have enough value in wallet']);
+            return response()->json(['error' => ["payer" => 'Payer doesn\'t have enough value in wallet']], 400);
         }
 
         $result = $this->userService->transfer($payer, $payee, $value);
 
         if (!$result) {
-            return response()->json(['error' => 'Unexpected error please try again']);
+            return response()->json(['error' => 'Unexpected error please try again'], 500);
         }
 
         $response = [
