@@ -8,7 +8,7 @@ class UserRepository implements UserRepositoryInterface
 {
     public function getUserByIdentity(string $identity)
     {
-        return User::where('identity', '=', $identity)->firstOrFail();
+        return User::where('identity', '=', $identity)->first();
     }
 
 }

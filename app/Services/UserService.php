@@ -37,7 +37,7 @@ class UserService
                 }
             });
 
-            $this->scheduleNotify($payerUser, $payeeUser, $value);
+            $this->scheduleNotify($payerUser->name, $payeeUser->email, $value);
             
             return true;
         } catch (Throwable $exception) {
@@ -48,20 +48,25 @@ class UserService
 
     public function hasCashWallet(string $identity, float $value): bool
     {
-        $user = $this->userRepository->getUserByIdentity($identity);
+        try {
+            $user = $this->userRepository->getUserByIdentity($identity);
+    
+            if ($user->wallet->cash == 0 || $user->wallet->cash < $value) {
+                return false;
+            }
 
-        if ($user->wallet->cash == 0 || $user->wallet->cash < $value) {
+            return true;
+        } catch (Throwable $exception) {
+            Log::error($exception->getMessage());
             return false;
         }
-
-        return true;
     }
 
     public function authorization(): bool
     {
         try {
             $uri = env('AUTHORIZATOR_HOST', '');
-            $client = new Client();
+            $client = $this->getGuzzleClient();
             $response = $client->get($uri);
 
             if ($response->getStatusCode() == 200) {
@@ -79,17 +84,25 @@ class UserService
         }
     }
 
-    public function scheduleNotify(User $payer, User $payee, string $value)
+    public function scheduleNotify(string $payerName, string $payeeEmail, string $value)
     {
         try {
-            $payeeMessage = "You received {$value} from {$payer->name}";
-            
-            NotifyUserJob::dispatch(['email' => $payee->email, 'message' => $payeeMessage])
-                ->onQueue('mail')
-                ->delay(now()->addMinutes(10));
+            $payeeMessage = "You received {$value} from {$payerName}";
+            $this->dispatchNotifyUserJob(['email' => $payeeEmail, 'message' => $payeeMessage]);
         } catch (Throwable $exception) {
             Log::error($exception->getMessage());
         }
     }
 
+    public function dispatchNotifyUserJob(array $args): void
+    {
+        NotifyUserJob::dispatch($args)
+            ->onQueue('mail')
+            ->delay(now()->addMinutes(10));
+    }
+
+    public function getGuzzleClient()
+    {
+        return new Client();
+    }
 }
