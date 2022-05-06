@@ -1,6 +1,6 @@
 **Transfer cash between users**
 ----
-  Returns json data about a single user.
+  Returns json data about a transaction between two users.
 
 * **URL**
 
